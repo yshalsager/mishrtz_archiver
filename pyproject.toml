@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "mishrtz_archiver"
+version = "0.1.0"
+description = "A simple tool to archive lectures from https://t.me/mishrtz channel"
+authors = ["yshalsager <ysh-alsager@hotmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Telethon = "^1.24.0"
+FastTelethonhelper = { git = "https://github.com/MiyukiKun/FastTelethonhelper.git", rev = "49e9c50"}
+Pyrogram = {extras = ["fast"], version = "^1.4.12"}
+TgCrypto = "^1.2.3"
+py7zr = "^0.18.3"
+
+[tool.poetry.dev-dependencies]
+black = "^22.3.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
