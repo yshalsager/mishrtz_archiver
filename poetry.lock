@@ -65,7 +65,7 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -188,7 +188,7 @@ test = ["pytest (>=6.0)", "pytest-benchmark", "pytest-cov", "pytest-timeout", "h
 
 [[package]]
 name = "pyrogram"
-version = "1.4.14"
+version = "1.4.15"
 description = "Elegant, modern and asynchronous Telegram MTProto API framework in Python for users and bots"
 category = "main"
 optional = false
@@ -239,6 +239,23 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "tqdm"
+version = "4.64.0"
+description = "Fast, Extensible Progress Meter"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["py-make (>=0.1.0)", "twine", "wheel"]
+notebook = ["ipywidgets (>=6)"]
+slack = ["slack-sdk"]
+telegram = ["requests"]
+
+[[package]]
 name = "typing-extensions"
 version = "4.1.1"
 description = "Backported and Experimental Type Hints for Python 3.6+"
@@ -257,7 +274,7 @@ python-versions = ">=3.6"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "11b11280673ceaa81a6223fa40978d23de3073b2848ff71cdc4659f869a9b16b"
+content-hash = "ced25bc6d732b30328609601a90876730a0de1ebfb89894d59f14d81cb1b14de"
 
 [metadata.files]
 black = [
@@ -613,8 +630,8 @@ pyppmd = [
     {file = "pyppmd-0.18.2.tar.gz", hash = "sha256:732b28ea25afa41a282c986178b29e60ea5ec2e2b67f66997af943f73d4673e0"},
 ]
 pyrogram = [
-    {file = "Pyrogram-1.4.14-py3-none-any.whl", hash = "sha256:7102f126327cbd6c3cd4dc4d536c5a0a3d3d832939509e2d7bbb523240032718"},
-    {file = "Pyrogram-1.4.14.tar.gz", hash = "sha256:c2209fa648519e5da3a32e1dbaa6382d61f111bd99edf9d5f232d7fab52352b2"},
+    {file = "Pyrogram-1.4.15-py3-none-any.whl", hash = "sha256:021a72c7654770d3d072e8ceaaeeb8135bce472b4628d133a3428e9d05c77365"},
+    {file = "Pyrogram-1.4.15.tar.gz", hash = "sha256:39ee3c44bfa118493e79b8714a36240dfc72731bf13c30096e42e999d8b0bce5"},
 ]
 pysocks = [
     {file = "PySocks-1.7.1-py27-none-any.whl", hash = "sha256:08e69f092cc6dbe92a0fdd16eeb9b9ffbc13cadfe5ca4c7bd92ffb078b293299"},
@@ -768,6 +785,10 @@ tgcrypto = [
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+]
+tqdm = [
+    {file = "tqdm-4.64.0-py2.py3-none-any.whl", hash = "sha256:74a2cdefe14d11442cedf3ba4e21a3b84ff9a2dbdc6cfae2c34addb2a14a5ea6"},
+    {file = "tqdm-4.64.0.tar.gz", hash = "sha256:40be55d30e200777a307a7585aee69e4eabb46b4ec6a4b4a5f2d9f11e7d5408d"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.1.1-py3-none-any.whl", hash = "sha256:21c85e0fe4b9a155d0799430b0ad741cdce7e359660ccbd8b530613e8df88ce2"},

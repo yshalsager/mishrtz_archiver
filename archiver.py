@@ -12,6 +12,7 @@ import multivolumefile
 from py7zr import SevenZipFile
 from pyrogram import Client
 from pyrogram.types import Message as PyrogramMessage
+from tqdm.asyncio import tqdm
 
 downloads_dir = Path("downloads/")
 if downloads_dir.exists():
@@ -25,8 +26,10 @@ uploads_dir.mkdir(exist_ok=True)
 ls_command = "ls -v" if run(["which", "exa"]).returncode else "exa -s name --no-icons"
 
 
-def progress(current, total):
-    print(f"{current * 100 / total:.1f}%")
+def progress(current, total, progress_bar):
+    progress_bar.update(current)
+    if current == total:
+        progress_bar.set_description("Done!")
 
 
 async def archive_series(
@@ -70,7 +73,17 @@ async def archive_series(
     print(f"Working on {len(messages)} files")
     for message in messages:
         print(f"Processing {repr(getattr(message, getattr(message, 'media')))}")
-        await client.download_media(message, progress=progress)
+        progress_bar = tqdm(
+            total=getattr(message, getattr(message, "media")).file_size,
+            unit="B",
+            unit_scale=True,
+            desc="Downloading...",
+            unit_divisor=1024,
+            miniters=1,
+        )
+        await client.download_media(
+            message, progress=progress, progress_args=(progress_bar,)
+        )
         # (
         #     downloads_dir / getattr(message, getattr(message, "media")).file_name
         # ).write_text(caption)
@@ -104,6 +117,14 @@ async def archive_series(
     rmtree(downloads_dir, ignore_errors=True)
     print("Uploading...")
     for file in sorted(uploads_dir.iterdir()):
+        progress_bar = tqdm(
+            total=file.stat().st_size,
+            unit="B",
+            unit_scale=True,
+            desc="Uploading...",
+            unit_divisor=1024,
+            miniters=1,
+        )
         if file.suffix in [
             ".mp3",
             ".m4a",
@@ -117,7 +138,13 @@ async def archive_series(
             "ra",
             "rm",
         ]:
-            await client.send_audio(chat_id=chat, audio=str(file), caption=caption)
+            await client.send_audio(
+                chat_id=chat,
+                audio=str(file),
+                caption=caption,
+                progress=progress,
+                progress_args=(progress_bar,),
+            )
         elif file.suffix in [
             ".mp4",
             ".mkv",
@@ -128,10 +155,20 @@ async def archive_series(
             "wmv",
             ".m4v",
         ]:
-            await client.send_video(chat_id=chat, video=str(file), caption=caption)
+            await client.send_video(
+                chat_id=chat,
+                video=str(file),
+                caption=caption,
+                progress=progress,
+                progress_args=(progress_bar,),
+            )
         else:
             await client.send_document(
-                chat_id=chat, document=str(file), caption=caption
+                chat_id=chat,
+                document=str(file),
+                caption=caption,
+                progress=progress,
+                progress_args=(progress_bar,),
             )
         file.unlink(missing_ok=True)
 
