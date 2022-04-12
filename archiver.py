@@ -27,7 +27,7 @@ ls_command = "ls -v" if run(["which", "exa"]).returncode else "exa -s name --no-
 
 
 def progress(current, total, progress_bar):
-    progress_bar.update(current)
+    progress_bar.update(current - progress_bar.n)
     if current == total:
         progress_bar.set_description("Done!")
 
@@ -76,7 +76,7 @@ async def archive_series(
         file = getattr(message, getattr(message, "media"))
         progress_bar = tqdm(
             total=getattr(message, getattr(message, "media")).file_size,
-            unit="B",
+            unit="iB",
             unit_scale=True,
             desc=f"Downloading {file.file_name}...",
             unit_divisor=1024,
@@ -129,7 +129,7 @@ async def archive_series(
     for file in sorted(uploads_dir.iterdir()):
         progress_bar = tqdm(
             total=file.stat().st_size,
-            unit="B",
+            unit="iB",
             unit_scale=True,
             desc=f"Uploading {file.name}...",
             unit_divisor=1024,
