@@ -74,12 +74,11 @@ async def archive_series(
     previous_message_filename = ""
     for idx, message in enumerate(messages):
         file = getattr(message, getattr(message, "media"))
-        print(f"Processing {repr(file)}")
         progress_bar = tqdm(
             total=getattr(message, getattr(message, "media")).file_size,
             unit="B",
             unit_scale=True,
-            desc="Downloading...",
+            desc=f"Downloading {file.file_name}...",
             unit_divisor=1024,
             miniters=1,
         )
@@ -132,7 +131,7 @@ async def archive_series(
             total=file.stat().st_size,
             unit="B",
             unit_scale=True,
-            desc="Uploading...",
+            desc=f"Uploading {file.name}...",
             unit_divisor=1024,
             miniters=1,
         )
@@ -141,13 +140,16 @@ async def archive_series(
             ".m4a",
             ".wav",
             ".ogg",
-            "flac",
-            "aac",
-            "wma",
-            "amr",
-            "opus",
-            "ra",
-            "rm",
+            ".flac",
+            ".aac",
+            ".wma",
+            ".amr",
+            ".opus",
+            ".ra",
+            ".rm",
+            ".m4b",
+            ".aif",
+            ".dts"
         ]:
             await client.send_audio(
                 chat_id=chat,
@@ -160,11 +162,13 @@ async def archive_series(
             ".mp4",
             ".mkv",
             ".3gp",
-            "webm",
-            "flv",
-            "avi",
-            "wmv",
+            ".webm",
+            ".flv",
+            ".avi",
+            ".wmv",
             ".m4v",
+            ".mpeg",
+            ".mov"
         ]:
             await client.send_video(
                 chat_id=chat,
