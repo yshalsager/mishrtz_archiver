@@ -99,17 +99,30 @@ async def archive_series(
     rmtree(downloads_dir, ignore_errors=True)
     print("Uploading...")
     for file in sorted(uploads_dir.iterdir()):
-        if (
-            file.name.endswith(".mp3")
-            or file.name.endswith(".m4a")
-            or file.name.endswith(".wav")
-        ):
+        if file.suffix in [
+            ".mp3",
+            ".m4a",
+            ".wav",
+            ".ogg",
+            "flac",
+            "aac",
+            "wma",
+            "amr",
+            "opus",
+            "ra",
+            "rm",
+        ]:
             await client.send_audio(chat_id=chat, audio=str(file), caption=caption)
-        elif (
-            file.name.endswith(".mp4")
-            or file.name.endswith(".mkv")
-            or file.name.endswith(".3gp")
-        ):
+        elif file.suffix in [
+            ".mp4",
+            ".mkv",
+            ".3gp",
+            "webm",
+            "flv",
+            "avi",
+            "wmv",
+            ".m4v",
+        ]:
             await client.send_video(chat_id=chat, video=str(file), caption=caption)
         else:
             await client.send_document(
