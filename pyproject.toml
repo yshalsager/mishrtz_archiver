@@ -7,8 +7,6 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-Telethon = "^1.24.0"
-FastTelethonhelper = { git = "https://github.com/MiyukiKun/FastTelethonhelper.git", rev = "49e9c50"}
 Pyrogram = {extras = ["fast"], version = "^1.4.12"}
 TgCrypto = "^1.2.3"
 py7zr = "^0.18.3"

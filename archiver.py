@@ -5,17 +5,13 @@ from asyncio.subprocess import Process
 from pathlib import Path
 from shutil import rmtree
 from subprocess import run
-from typing import AsyncGenerator, Union
+from typing import AsyncGenerator
 from zipfile import ZIP_DEFLATED, ZipFile
 
 import multivolumefile
-from FastTelethonhelper import fast_download, fast_upload
 from py7zr import SevenZipFile
 from pyrogram import Client
 from pyrogram.types import Message as PyrogramMessage
-from telethon import TelegramClient
-from telethon.helpers import TotalList
-from telethon.tl.custom import Message as TelethonMessage
 
 downloads_dir = Path("downloads/")
 if downloads_dir.exists():
@@ -33,12 +29,13 @@ def progress(current, total):
 
 
 async def archive_series(
-    message: Union[TelethonMessage, PyrogramMessage],
+    message: PyrogramMessage,
     chat: str,
-    pyrogram=False,
-    use_python_zip=False,
+    use_python_zip: bool = False,
 ):
-    caption = f"https://t.me/{message.chat.username}/{message.message_id or message.id}\n{message.text}"
+    caption = (
+        f"https://t.me/{message.chat.username}/{message.message_id}\n{message.text}"
+    )
     lecture_name = (
         re.sub("#.*\n", "", re.sub("https://.*", "", message.text))
         .replace("\n", " ")
@@ -52,15 +49,9 @@ async def archive_series(
     messages = []
     start_id = int(start_message_link.group(2)) + 1
     while True:
-        # noinspection PyTypeChecker
-        if pyrogram:
-            message: PyrogramMessage = await client.get_messages(
-                f"@{start_message_link.group(1)}", message_ids=start_id
-            )
-        else:
-            message: TelethonMessage = await client.get_messages(
-                f"@{start_message_link.group(1)}", ids=start_id
-            )
+        message: PyrogramMessage = await client.get_messages(
+            f"@{start_message_link.group(1)}", message_ids=start_id
+        )
         if message:
             if (
                 not message.document
@@ -75,12 +66,8 @@ async def archive_series(
         return
     print(f"Working on {len(messages)} files")
     for message in messages:
-        if hasattr(message, "file"):
-            print(f"Processing {message.file.name}")
-            await fast_download(client, message, reply=None)
-        else:
-            print(f"Processing {getattr(message, getattr(message, 'media'))}")
-            await client.download_media(message, progress=progress)
+        print(f"Processing {getattr(message, getattr(message, 'media'))}")
+        await client.download_media(message, progress=progress)
         # Path(message.file.name).write_text(message.text)
     # Zip files
     if not use_python_zip:
@@ -112,28 +99,21 @@ async def archive_series(
     rmtree(downloads_dir, ignore_errors=True)
     print("Uploading...")
     for file in sorted(uploads_dir.iterdir()):
-        if pyrogram:
-            if (
-                file.name.endswith(".mp3")
-                or file.name.endswith(".m4a")
-                or file.name.endswith(".wav")
-            ):
-                await client.send_audio(chat_id=chat, audio=str(file), caption=caption)
-            elif (
-                file.name.endswith(".mp4")
-                or file.name.endswith(".mkv")
-                or file.name.endswith(".3gp")
-            ):
-                await client.send_video(chat_id=chat, video=str(file), caption=caption)
-            else:
-                await client.send_document(
-                    chat_id=chat, document=str(file), caption=caption
-                )
+        if (
+            file.name.endswith(".mp3")
+            or file.name.endswith(".m4a")
+            or file.name.endswith(".wav")
+        ):
+            await client.send_audio(chat_id=chat, audio=str(file), caption=caption)
+        elif (
+            file.name.endswith(".mp4")
+            or file.name.endswith(".mkv")
+            or file.name.endswith(".3gp")
+        ):
+            await client.send_video(chat_id=chat, video=str(file), caption=caption)
         else:
-            await client.send_file(
-                chat,
-                file=await fast_upload(client, str(file), str(file.name)),
-                caption=caption,
+            await client.send_document(
+                chat_id=chat, document=str(file), caption=caption
             )
         file.unlink(missing_ok=True)
 
@@ -142,39 +122,21 @@ async def main(
     start_message_id: int,
     end_message_id: int,
     chat: str,
-    pyrogram=False,
     use_python_zip=False,
 ):
     pattern = r"^\([\d,]+\)"
-    # noinspection PyTypeChecker
-    if pyrogram:
-        series_list: AsyncGenerator[PyrogramMessage] = client.iter_history(
-            "@mishrtz",
-            offset_id=start_message_id - 1,
-            limit=(end_message_id + 1) - (start_message_id - 1),
-            reverse=True,
-        )
-        message: PyrogramMessage
-        async for message in series_list:
-            if re.match(pattern, message.text):
-                print(f"Downloading series {message.text}")
-                await archive_series(message, chat, pyrogram=pyrogram)
-                print("Done")
-    else:
-        series_list: TotalList[TelethonMessage] = await client.get_messages(
-            "@mishrtz",
-            min_id=start_message_id - 1,
-            max_id=end_message_id + 1,
-            reverse=True,
-        )
-        message: TelethonMessage
-        for message in series_list:
-            if re.match(pattern, message.text):
-                print(f"Downloading series {message.text}")
-                await archive_series(
-                    message, chat, pyrogram=pyrogram, use_python_zip=use_python_zip
-                )
-                print("Done")
+    series_list: AsyncGenerator[PyrogramMessage] = client.iter_history(
+        "@mishrtz",
+        offset_id=start_message_id - 1,
+        limit=(end_message_id + 1) - (start_message_id - 1),
+        reverse=True,
+    )
+    message: PyrogramMessage
+    async for message in series_list:
+        if re.match(pattern, message.text):
+            print(f"Downloading series {message.text}")
+            await archive_series(message, chat, use_python_zip=use_python_zip)
+            print("Done")
 
 
 if __name__ == "__main__":
@@ -211,13 +173,6 @@ if __name__ == "__main__":
         "-c", "--chat", help="Chat to send file to", default="me", type=str
     )
     parser.add_argument(
-        "-a",
-        "--pyrogram",
-        help="Use Pyrogram instead of Telethon for interacting with Telegram",
-        action="store_true",
-        default=False,
-    )
-    parser.add_argument(
         "-z",
         "--zip",
         help="Use Python zip instead of system zip",
@@ -226,18 +181,13 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    client = (
-        TelegramClient("mishrtz_telethon", api_id=args.api_id, api_hash=args.api_hash)
-        if not args.pyrogram
-        else Client("mishrtz_pyrogram", api_id=args.api_id, api_hash=args.api_hash)
-    )
+    client = Client("mishrtz_pyrogram", api_id=args.api_id, api_hash=args.api_hash)
     with client:
         client.loop.run_until_complete(
             main(
                 args.start,
                 args.end,
                 args.chat,
-                pyrogram=args.pyrogram,
                 use_python_zip=args.zip,
             )
         )
