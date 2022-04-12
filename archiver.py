@@ -44,6 +44,8 @@ async def archive_series(
         re.sub("#.*\n", "", re.sub("https://.*", "", message.text))
         .replace("\n", " ")
         .replace(",", "")
+        .replace('"', "")
+        .replace("'", "")
         .strip()[:100]
     )
     start_message_link = re.search(r"https://t.me/([\w.]+)/(\d+)", message.text)
@@ -149,7 +151,7 @@ async def archive_series(
             ".rm",
             ".m4b",
             ".aif",
-            ".dts"
+            ".dts",
         ]:
             await client.send_audio(
                 chat_id=chat,
@@ -168,7 +170,7 @@ async def archive_series(
             ".wmv",
             ".m4v",
             ".mpeg",
-            ".mov"
+            ".mov",
         ]:
             await client.send_video(
                 chat_id=chat,
