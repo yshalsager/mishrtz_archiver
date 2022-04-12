@@ -16,6 +16,7 @@ from pyrogram.types import Message as PyrogramMessage
 downloads_dir = Path("downloads/")
 if downloads_dir.exists():
     rmtree(downloads_dir, ignore_errors=True)
+downloads_dir.mkdir(exist_ok=True)
 uploads_dir = Path("uploads/")
 if uploads_dir.exists():
     rmtree(uploads_dir, ignore_errors=True)
@@ -47,18 +48,20 @@ async def archive_series(
         print(f"Can't find message link in {message.text}!")
         return
     messages = []
-    start_id = int(start_message_link.group(2)) + 1
+    first_message: PyrogramMessage = await client.get_messages(
+        f"@{start_message_link.group(1)}", message_ids=int(start_message_link.group(2))
+    )
+    start_id = (
+        int(start_message_link.group(2)) + 1
+        if first_message.media not in ("audio", "document", "video", "voice")
+        else int(start_message_link.group(2))
+    )
     while True:
         message: PyrogramMessage = await client.get_messages(
             f"@{start_message_link.group(1)}", message_ids=start_id
         )
-        if message:
-            if (
-                not message.document
-                and not message.audio
-                and not message.video
-                and not message.voice
-            ):
+        if not message.empty:
+            if message.media not in ("audio", "document", "video", "voice"):
                 break
             messages.append(message)
         start_id += 1
@@ -66,9 +69,11 @@ async def archive_series(
         return
     print(f"Working on {len(messages)} files")
     for message in messages:
-        print(f"Processing {getattr(message, getattr(message, 'media'))}")
+        print(f"Processing {repr(getattr(message, getattr(message, 'media')))}")
         await client.download_media(message, progress=progress)
-        # Path(message.file.name).write_text(message.text)
+        # (
+        #     downloads_dir / getattr(message, getattr(message, "media")).file_name
+        # ).write_text(caption)
     # Zip files
     if not use_python_zip:
         process: Process = await create_subprocess_shell(
