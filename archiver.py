@@ -71,8 +71,10 @@ async def archive_series(
     if not messages:
         return
     print(f"Working on {len(messages)} files")
-    for message in messages:
-        print(f"Processing {repr(getattr(message, getattr(message, 'media')))}")
+    previous_message_filename = ""
+    for idx, message in enumerate(messages):
+        file = getattr(message, getattr(message, "media"))
+        print(f"Processing {repr(file)}")
         progress_bar = tqdm(
             total=getattr(message, getattr(message, "media")).file_size,
             unit="B",
@@ -81,8 +83,17 @@ async def archive_series(
             unit_divisor=1024,
             miniters=1,
         )
+        file_name = (
+            f"{downloads_dir}/{idx}_{file.file_name}"
+            if previous_message_filename and previous_message_filename == file.file_name
+            else ""
+        )
+        previous_message_filename = file.file_name
         await client.download_media(
-            message, progress=progress, progress_args=(progress_bar,)
+            message,
+            progress=progress,
+            progress_args=(progress_bar,),
+            file_name=file_name,
         )
         # (
         #     downloads_dir / getattr(message, getattr(message, "media")).file_name
