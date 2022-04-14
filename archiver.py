@@ -29,7 +29,7 @@ ls_command = "ls -v" if run(["which", "exa"]).returncode else "exa -s name --no-
 def progress(current, total, progress_bar):
     progress_bar.update(current - progress_bar.n)
     if current == total:
-        progress_bar.set_description("Done!")
+        progress_bar.set_description(f"Done! {progress_bar.desc.split(' ', maxsplit=1)[-1]}")
 
 
 async def archive_series(
