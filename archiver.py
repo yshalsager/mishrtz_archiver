@@ -29,7 +29,9 @@ ls_command = "ls -v" if run(["which", "exa"]).returncode else "exa -s name --no-
 def progress(current, total, progress_bar):
     progress_bar.update(current - progress_bar.n)
     if current == total:
-        progress_bar.set_description(f"Done! {progress_bar.desc.split(' ', maxsplit=1)[-1]}")
+        progress_bar.set_description(
+            f"Done! {progress_bar.desc.split(' ', maxsplit=1)[-1]}"
+        )
 
 
 async def archive_series(
@@ -76,20 +78,25 @@ async def archive_series(
     previous_message_filename = ""
     for idx, message in enumerate(messages):
         file = getattr(message, getattr(message, "media"))
+        file_name = getattr(
+            file,
+            "file_name",
+            f"{idx:0>3}.{file.mime_type.split('/')[-1].split('-')[-1]}",
+        )
         progress_bar = tqdm(
-            total=getattr(message, getattr(message, "media")).file_size,
+            total=file.file_size,
             unit="iB",
             unit_scale=True,
-            desc=f"Downloading {file.file_name}...",
+            desc=f"Downloading {file_name}...",
             unit_divisor=1024,
             miniters=1,
         )
         file_name = (
-            f"{downloads_dir}/{idx}_{file.file_name}"
-            if previous_message_filename and previous_message_filename == file.file_name
+            f"{downloads_dir}/{idx}_{file_name}"
+            if previous_message_filename and previous_message_filename == file_name
             else ""
         )
-        previous_message_filename = file.file_name
+        previous_message_filename = file_name
         await client.download_media(
             message,
             progress=progress,
@@ -152,6 +159,7 @@ async def archive_series(
             ".m4b",
             ".aif",
             ".dts",
+            ".mpeg",
         ]:
             await client.send_audio(
                 chat_id=chat,
