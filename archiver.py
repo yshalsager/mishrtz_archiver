@@ -75,7 +75,7 @@ async def archive_series(
     if not messages:
         return
     print(f"Working on {len(messages)} files")
-    previous_message_filename = ""
+    previous_filenames = []
     for idx, message in enumerate(messages):
         file = getattr(message, getattr(message, "media"))
         file_name = getattr(
@@ -91,12 +91,9 @@ async def archive_series(
             unit_divisor=1024,
             miniters=1,
         )
-        file_name = (
-            f"{downloads_dir}/{idx}_{file_name}"
-            if previous_message_filename and previous_message_filename == file_name
-            else ""
-        )
-        previous_message_filename = file_name
+        if file_name in previous_filenames:
+            file_name = f"{downloads_dir}/{idx:0>3}_{file_name}"
+        previous_filenames.append(file_name)
         await client.download_media(
             message,
             progress=progress,
