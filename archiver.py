@@ -210,6 +210,8 @@ async def main(
     )
     message: PyrogramMessage
     async for message in series_list:
+        if not message.text:
+            continue
         if re.match(pattern, message.text):
             print(f"Downloading series {message.text}")
             await archive_series(message, chat, use_python_zip=use_python_zip)
