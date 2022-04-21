@@ -81,7 +81,7 @@ async def archive_series(
         file_name = getattr(
             file,
             "file_name"
-        ) or f"{idx:0>3}.{file.mime_type.split('/')[-1].split('-')[-1]}"
+        ) or f"{idx+1:0>3}.{file.mime_type.split('/')[-1].split('-')[-1]}"
         progress_bar = tqdm(
             total=file.file_size,
             unit="iB",
@@ -91,7 +91,7 @@ async def archive_series(
             miniters=1,
         )
         if file_name in previous_filenames:
-            file_name = f"{downloads_dir}/{idx:0>3}_{file_name}"
+            file_name = f"{downloads_dir}/{idx+1:0>3}_{file_name}"
         previous_filenames.append(file_name)
         await client.download_media(
             message,
