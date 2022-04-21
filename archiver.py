@@ -80,9 +80,8 @@ async def archive_series(
         file = getattr(message, getattr(message, "media"))
         file_name = getattr(
             file,
-            "file_name",
-            f"{idx:0>3}.{file.mime_type.split('/')[-1].split('-')[-1]}",
-        )
+            "file_name"
+        ) or f"{idx:0>3}.{file.mime_type.split('/')[-1].split('-')[-1]}"
         progress_bar = tqdm(
             total=file.file_size,
             unit="iB",
