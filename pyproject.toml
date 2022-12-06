@@ -9,7 +9,7 @@ license = "MIT"
 python = "^3.9"
 Pyrogram = {extras = ["fast"], version = "^1.4.12"}
 TgCrypto = "^1.2.3"
-py7zr = "^0.18.3"
+py7zr = "^0.20.2"
 tqdm = "^4.64.0"
 
 [tool.poetry.dev-dependencies]
